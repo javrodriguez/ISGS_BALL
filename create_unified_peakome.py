@@ -54,7 +54,8 @@ class Peak:
         new_start = min(self.start, other.start)
         new_end = max(self.end, other.end)
         new_score = max(self.score, other.score)  # Take the higher score
-        new_id = f"{self.peak_id}_{other.peak_id}" if self.peak_id and other.peak_id else ""
+        # Don't concatenate IDs - just use a simple merged ID
+        new_id = f"merged_peak" if self.peak_id or other.peak_id else ""
         
         return Peak(self.chrom, new_start, new_end, new_score, new_id)
     
@@ -183,7 +184,7 @@ def make_peaks_uniform_length(peaks, target_length=1000):
                     if piece_start < peak.start:
                         break
                 
-                piece_id = f"{peak.peak_id}_piece_{len(uniform_peaks)+1}" if peak.peak_id else f"piece_{len(uniform_peaks)+1}"
+                piece_id = f"split_peak" if peak.peak_id else "split_peak"
                 piece_peak = Peak(peak.chrom, piece_start, piece_end, peak.score, piece_id)
                 uniform_peaks.append(piece_peak)
                 
@@ -291,9 +292,8 @@ def main():
     logger.info(f"Writing {len(processed_peaks)} peaks to {args.output}")
     with open(args.output, 'w') as f:
         for i, peak in enumerate(processed_peaks):
-            # Generate a unique ID if none exists
-            if not peak.peak_id:
-                peak.peak_id = f"unified_peak_{i+1:06d}"
+            # Generate a simple sequential ID
+            peak.peak_id = f"PEAK_{i+1}"
             
             f.write(peak.to_bed_line() + '\n')
     
