@@ -216,7 +216,8 @@ echo "Total execution time for sample ${sample_name}: ${total_duration} seconds"
 EOF
     
     chmod +x "$SAMPLE_JOB_SCHEDULER"
-    
+    sync
+    sleep 1
     # Submit the sample job scheduler and wait for completion
     SAMPLE_JOB=$(sbatch "$SAMPLE_JOB_SCHEDULER" | awk '{print $4}')
     echo "Submitted sample job scheduler with ID $SAMPLE_JOB for sample $sample_name"
