@@ -186,11 +186,17 @@ for chunk in \${OUTDIR}/bed_chunk_*; do
         end=\$(( (i + 1) * BATCH_SIZE ))
         [ "\$end" -gt "\$lines" ] && end=\$lines
         
-        JOB=\$(sbatch --array=\${start}-\${end} ${SAMPLE_SCREEN_SCRIPT} "\$chunk" "\${OUTDIR}" | awk '{print \\\$4}')
+        JOB=\$(sbatch --array=\${start}-\${end} ${SAMPLE_SCREEN_SCRIPT} "\$chunk" "\${OUTDIR}" | awk '{print $4}')
         echo "Submitted batch job with ID \$JOB for sample ${sample_name}, waiting to complete..."
-        sleep 10
-        
-        while sacct -j \$JOB --format=State --noheader | grep -q 'RUNNING\|PENDING'; do
+        sleep 5
+        # Wait for job to appear in squeue
+        while ! squeue -j \$JOB | grep -q \$JOB; do
+            echo "Waiting for squeue to recognize job \$JOB..."
+            sleep 2
+        done
+        # Wait for job to finish (disappear from squeue)
+        while squeue -j \$JOB | grep -q \$JOB; do
+            echo "Waiting for job \$JOB to finish..."
             sleep 10
         done
         
