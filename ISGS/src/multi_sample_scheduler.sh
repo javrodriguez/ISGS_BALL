@@ -86,8 +86,8 @@ while IFS= read -r sample_name; do
     
     # Set sample-specific paths
     SAMPLE_OUTDIR="${MAIN_OUTDIR}/${sample_name}"
-    CTCF_PATH="${INPUT_DIR}/${sample_name}/genomic_features/ctcf_log2fc.bw"
-    ATAC_PATH="${INPUT_DIR}/${sample_name}/genomic_features/atac.bw"
+    CTCF_PATH="${INPUT_DIR}/${sample_name}.dd-maxATAC-predict/maxatac_predict.bw"
+    ATAC_PATH="${INPUT_DIR}/${sample_name}.dd-maxATAC_prepare/${sample_name}.dd_IS_slop20_RP20M_minmax01.bw"
     
     # Check if sample files exist
     if [ ! -f "$CTCF_PATH" ]; then

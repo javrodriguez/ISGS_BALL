@@ -180,10 +180,10 @@ SEQ_PATH="/path/to/dna/sequence"
 ### Directory Structure
 ```
 <input_dir>/
-├── <sample_name>/
-│   └── genomic_features/
-│       ├── ctcf_log2fc.bw
-│       └── atac.bw
+├── <sample_name>.dd-maxATAC_prepare/
+│   └── <sample_name>.dd_IS_slop20_RP20M_minmax01.bw
+└── <sample_name>.dd-maxATAC-predict/
+    └── maxatac_predict.bw
 ```
 
 ## 📊 Performance Considerations

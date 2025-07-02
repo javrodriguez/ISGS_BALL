@@ -4,7 +4,7 @@ This pipeline performs in-silico genetic screening of ATAC-seq peaks across mult
 
 ## Overview
 
-The pipeline screens all peaks in `unified_peakome_1kb_exact.bed` for all samples listed in `samples.txt`. Each sample uses its own genomic features (CTCF and ATAC bigwig files) while sharing the same model and sequence parameters.
+The pipeline screens all peaks in `unified_peakome_1kb_no_overlaps.bed` for all samples listed in `samples.txt`. Each sample uses its own genomic features (CTCF and ATAC bigwig files) while sharing the same model and sequence parameters.
 
 ## Pipeline Architecture
 
@@ -29,10 +29,10 @@ The pipeline screens all peaks in `unified_peakome_1kb_exact.bed` for all sample
 
 ```
 <input_dir>/
-├── <sample_name>/
-│   └── genomic_features/
-│       ├── ctcf_log2fc.bw
-│       └── atac.bw
+├── <sample_name>.dd-maxATAC_prepare/
+│   └── <sample_name>.dd_IS_slop20_RP20M_minmax01.bw
+└── <sample_name>.dd-maxATAC-predict/
+    └── maxatac_predict.bw
 ```
 
 ## Usage
@@ -62,7 +62,7 @@ cd ISGS/src
 ### 4. Manual Execution
 ```bash
 sbatch multi_sample_scheduler.sh \
-  unified_peakome_1kb_exact.bed \
+  unified_peakome_1kb_no_overlaps.bed \
   samples.txt \
   /path/to/input/dir \
   /path/to/model.ckpt \
@@ -137,13 +137,13 @@ tail -f screening_results_*/<sample_name>/batch_timing.csv
 ## Performance Considerations
 
 ### Timing
-- Each sample processes ~50,000 peaks (based on unified_peakome_1kb_exact.bed)
-- Estimated time per sample: 2-4 hours (depending on HPC load)
-- Total time for 87 samples: ~1-2 weeks
+- Each sample processes ~100-150,000 peaks (based on unified_peakome_1kb_no_overlaps.bed)
+- Estimated time per sample: 4-8 hours (depending on HPC load)
+- Total time for 155 samples: ~3-4 weeks
 
 ### Storage
-- Each sample generates ~1-2GB of output
-- Total storage requirement: ~100-200GB for 87 samples
+- Each sample generates ~2-4GB of output
+- Total storage requirement: ~200-400GB for 155 samples
 
 ## Troubleshooting
 
@@ -165,7 +165,7 @@ tail -f screening_results_*/<sample_name>/batch_timing.csv
 Run with a single sample first:
 ```bash
 echo "BALL-MCG001" > test_samples.txt
-sbatch multi_sample_scheduler.sh unified_peakome_1kb_exact.bed test_samples.txt /path/to/input /path/to/model /path/to/seq
+sbatch multi_sample_scheduler.sh unified_peakome_1kb_no_overlaps.bed test_samples.txt /path/to/input /path/to/model /path/to/seq
 ```
 
 ## Files
