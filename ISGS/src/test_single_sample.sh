@@ -10,7 +10,7 @@ echo "=========================="
 echo "BALL-MCG001" > test_samples.txt
 
 # Create a minimal test BED file (just 10 lines)
-head -10 ../unified_peakome_1kb_exact.bed > test_bed.bed
+head -10 ../unified_peakome_1kb_no_overlaps.bed > test_bed.bed
 
 echo "Created test files:"
 echo "- test_samples.txt (1 sample)"
@@ -40,8 +40,8 @@ while IFS= read -r sample_name; do
     
     # Set sample-specific paths
     SAMPLE_OUTDIR="${MAIN_OUTDIR}/${sample_name}"
-    CTCF_PATH="${INPUT_DIR}/${sample_name}/genomic_features/ctcf_log2fc.bw"
-    ATAC_PATH="${INPUT_DIR}/${sample_name}/genomic_features/atac.bw"
+    CTCF_PATH="${INPUT_DIR}/${sample_name}.dd-maxATAC-predict/maxatac_predict.bw"
+    ATAC_PATH="${INPUT_DIR}/${sample_name}.dd-maxATAC_prepare/${sample_name}.dd_IS_slop20_RP20M_minmax01.bw"
     
     # Create sample output directory
     mkdir -p "$SAMPLE_OUTDIR"
