@@ -109,6 +109,10 @@ while IFS= read -r sample_name; do
     # Create sample output directory
     mkdir -p "$SAMPLE_OUTDIR"
     
+    # Create log directories with sample_name expanded at generation time
+    mkdir -p "logs-job_scheduler_${sample_name}"
+    mkdir -p "logs-screen_${sample_name}"
+    
     # Create sample-specific screen script
     SAMPLE_SCREEN_SCRIPT="${SAMPLE_OUTDIR}/screen_${sample_name}.sh"
     cat > "$SAMPLE_SCREEN_SCRIPT" << EOF
@@ -163,10 +167,6 @@ MAX_INDEX=2500
 
 # Create output directory if it doesn't exist
 mkdir -p "${OUTDIR}"
-
-# Create log directories
-mkdir -p "logs-job_scheduler_${sample_name}"
-mkdir -p "logs-screen_${sample_name}"
 
 # Create timing log file
 echo "Batch,Start Time,End Time,Duration (seconds)" > "${OUTDIR}/batch_timing.csv"
