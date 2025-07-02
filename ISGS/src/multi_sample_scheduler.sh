@@ -157,6 +157,8 @@ EOF
     echo "#SBATCH --time=12:00:00" >> "$SAMPLE_JOB_SCHEDULER"
     echo "BEDFILE=$BEDFILE" >> "$SAMPLE_JOB_SCHEDULER"
     echo "OUTDIR=$SAMPLE_OUTDIR" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "BATCH_SIZE=1000" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "MAX_INDEX=2500" >> "$SAMPLE_JOB_SCHEDULER"
     cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
 # Create output directory if it doesn't exist
 mkdir -p "${OUTDIR}"
