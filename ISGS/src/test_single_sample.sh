@@ -10,7 +10,7 @@ echo "=========================="
 echo "BALL-MCG001" > test_samples.txt
 
 # Create a minimal test BED file (just 10 lines)
-head -10 ../unified_peakome_1kb_no_overlaps.bed > test_bed.bed
+head -10 ../peakome.bed > test_bed.bed
 
 echo "Created test files:"
 echo "- test_samples.txt (1 sample)"
