@@ -110,7 +110,6 @@ while IFS= read -r sample_name; do
     mkdir -p "$SAMPLE_OUTDIR"
     
     # Create log directories with sample_name expanded at generation time
-    mkdir -p "logs-job_scheduler_${sample_name}"
     mkdir -p "logs-screen_${sample_name}"
     
     # Create sample-specific screen script
