@@ -20,15 +20,41 @@ This project performs genetic screening on **87 B-ALL samples** using:
 │   │   ├── test_pipeline.sh             # Validation script
 │   │   └── test_single_sample.sh        # Single sample test
 │   └── README.md                  # Pipeline documentation
-├── peaks/                         # Individual sample peak files
-│   ├── GSM6481643.peaks.bed       # Sample 1 peaks
-│   ├── GSM6481644.peaks.bed       # Sample 2 peaks
-│   └── ...                        # (87 total samples)
+├── peaks/                         # Individual sample peak files (see Data Files section)
 ├── *.py                          # Python analysis scripts
-├── unified_peakome_1kb_no_overlaps.bed  # Unified peakome
 ├── samples.txt                   # Sample list for pipeline
 └── README.md                     # This file
 ```
+
+## 📊 Data Files
+
+**⚠️ Important**: Due to GitHub's file size limits, the BED files are not included in this repository. You need to obtain them separately.
+
+### Required BED Files (Not in Repository)
+- **Individual Sample Peaks**: 87 GSM files in `peaks/` directory
+  - Each file contains ATAC-seq peaks for one sample
+  - Format: BED4 (chr, start, end, peak_id)
+  - Example: `peaks/GSM6481643.peaks.bed`
+
+- **Unified Peakome**: `unified_peakome_1kb_no_overlaps.bed`
+  - Created from all 87 samples
+  - Overlap removal for unique regions
+  - Used for screening across all samples
+
+### How to Obtain BED Files
+1. **Contact the authors** for access to the BED files
+2. **Use the Python scripts** in this repository to generate them:
+   ```bash
+   # Generate individual peak files from your ATAC-seq data
+   python create_unified_peakome.py
+   
+   # This will create both individual sample peaks and the unified peakome
+   ```
+
+### Sample List
+- `samples.txt` contains sample names
+- One sample per line
+- Comments start with `#`
 
 ## 🔬 Scientific Background
 
@@ -50,12 +76,18 @@ The CoRIGAMI foundation model has been trained on B-ALL chromatin structure data
 - SLURM cluster access
 - CoRIGAMI environment (`conda activate corigami_ball`)
 - Access to genomic data files
+- **BED files** (see Data Files section above)
 
 ### 2. Setup
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd good_samples_frip015
+git clone https://github.com/javrodriguez/ISGS_BALL.git
+cd ISGS_BALL
+
+# Obtain the required BED files (see Data Files section)
+# Place them in the correct locations:
+# - Individual peaks: peaks/GSM*.peaks.bed
+# - Unified peakome: unified_peakome_1kb_no_overlaps.bed
 
 # Update paths in the configuration
 cd ISGS/src
@@ -72,24 +104,6 @@ cd ISGS/src
 ```bash
 ./run_multi_sample_screening.sh
 ```
-
-## 📊 Data Files
-
-### Individual Sample Peaks
-- **87 GSM files** in `peaks/` directory
-- Each file contains ATAC-seq peaks for one sample
-- Format: BED4 (chr, start, end, peak_id)
-
-### Unified Peakome
-- `unified_peakome_1kb_no_overlaps.bed`
-- Created from all 87 samples
-- Overlap removal for unique regions
-- Used for screening across all samples
-
-### Sample List
-- `samples.txt` contains sample names
-- One sample per line
-- Comments start with `#`
 
 ## 🔧 Pipeline Components
 
@@ -195,9 +209,10 @@ SEQ_PATH="/path/to/dna/sequence"
 ## 🐛 Troubleshooting
 
 ### Common Issues
-1. **Missing genomic features**: Check file paths in `samples.txt`
-2. **SLURM job failures**: Check log files in `logs-*/` directories
-3. **Permission errors**: Ensure scripts are executable (`chmod +x *.sh`)
+1. **Missing BED files**: Ensure you have obtained the required BED files
+2. **Missing genomic features**: Check file paths in `samples.txt`
+3. **SLURM job failures**: Check log files in `logs-*/` directories
+4. **Permission errors**: Ensure scripts are executable (`chmod +x *.sh`)
 
 ### Debug Mode
 ```bash
