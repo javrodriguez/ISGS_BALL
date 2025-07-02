@@ -148,79 +148,67 @@ EOF
     # Run the sample-specific job scheduler
     echo "Starting screening for sample: $sample_name"
     
-    # Create sample-specific job scheduler
-    SAMPLE_JOB_SCHEDULER="${SAMPLE_OUTDIR}/job_scheduler_${sample_name}.sh"
-    echo "#!/bin/bash" > "$SAMPLE_JOB_SCHEDULER"
-    echo "#SBATCH --mem=2gb" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "#SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "#SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "#SBATCH --time=12:00:00" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "BEDFILE=$BEDFILE" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "OUTDIR=$SAMPLE_OUTDIR" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "BATCH_SIZE=1000" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "MAX_INDEX=2500" >> "$SAMPLE_JOB_SCHEDULER"
-    cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
-# Create output directory if it doesn't exist
-mkdir -p "${OUTDIR}"
-
-# Create timing log file
-echo "Batch,Start Time,End Time,Duration (seconds)" > "${OUTDIR}/batch_timing.csv"
-
-# Split BED file into chunks
-split -l $MAX_INDEX -d $BEDFILE ${OUTDIR}/bed_chunk_
-
-for chunk in ${OUTDIR}/bed_chunk_*; do
-    lines=$(wc -l < "$chunk")
-    num_batches=$(( (lines + BATCH_SIZE - 1) / BATCH_SIZE ))
+    # Define batch parameters (previously in job_scheduler script)
+    BATCH_SIZE=1000
+    MAX_INDEX=2500
     
-    for ((i=0; i<num_batches; i++)); do
-        # Record batch start time
-        batch_start_time=$(date +%s)
+    # Record sample processing start time
+    sample_processing_start_time=$(date +%s)
+    
+    # Create output directory if it doesn't exist
+    mkdir -p "${SAMPLE_OUTDIR}"
+
+    # Create timing log file
+    echo "Batch,Start Time,End Time,Duration (seconds)" > "${SAMPLE_OUTDIR}/batch_timing.csv"
+
+    # Split BED file into chunks
+    split -l $MAX_INDEX -d $BEDFILE ${SAMPLE_OUTDIR}/bed_chunk_
+
+    for chunk in ${SAMPLE_OUTDIR}/bed_chunk_*; do
+        lines=$(wc -l < "$chunk")
+        num_batches=$(( (lines + BATCH_SIZE - 1) / BATCH_SIZE ))
         
-        start=$((i * BATCH_SIZE + 1))
-        end=$(( (i + 1) * BATCH_SIZE ))
-        [ "$end" -gt "$lines" ] && end=$lines
-        
-        JOB=$(sbatch --time=12:00:00 --array=${start}-${end} ${SAMPLE_SCREEN_SCRIPT} "$chunk" "${OUTDIR}" | awk '{print $4}')
-        echo "Submitted batch job with ID $JOB for sample ${sample_name}, waiting to complete..."
-        sleep 5
-        # Wait for job to appear in squeue
-        while ! squeue -j $JOB | grep -q $JOB; do
-            echo "Waiting for squeue to recognize job $JOB..."
-            sleep 2
+        for ((i=0; i<num_batches; i++)); do
+            # Record batch start time
+            batch_start_time=$(date +%s)
+            
+            start=$((i * BATCH_SIZE + 1))
+            end=$(( (i + 1) * BATCH_SIZE ))
+            [ "$end" -gt "$lines" ] && end=$lines
+            
+            # Submit batch job directly from main scheduler (no nested sbatch)
+            JOB=$(sbatch --time=12:00:00 --array=${start}-${end} ${SAMPLE_SCREEN_SCRIPT} "$chunk" "${SAMPLE_OUTDIR}" | awk '{print $4}')
+            echo "Submitted batch job with ID $JOB for sample ${sample_name}, waiting to complete..."
+            sleep 5
+            # Wait for job to appear in squeue
+            while ! squeue -j $JOB | grep -q $JOB; do
+                echo "Waiting for squeue to recognize job $JOB..."
+                sleep 2
+            done
+            # Wait for job to finish (disappear from squeue)
+            while squeue -j $JOB | grep -q $JOB; do
+                echo "Waiting for job $JOB to finish..."
+                sleep 10
+            done
+            
+            # Record batch end time and duration
+            batch_end_time=$(date +%s)
+            batch_duration=$((batch_end_time - batch_start_time))
+            
+            # Log batch timing
+            echo "${chunk}_batch_${i},${batch_start_time},${batch_end_time},${batch_duration}" >> "${SAMPLE_OUTDIR}/batch_timing.csv"
+            
+            echo "Completed batch ${i} of ${chunk} for sample ${sample_name} in ${batch_duration} seconds"
         done
-        # Wait for job to finish (disappear from squeue)
-        while squeue -j $JOB | grep -q $JOB; do
-            echo "Waiting for job $JOB to finish..."
-            sleep 10
-        done
-        
-        # Record batch end time and duration
-        batch_end_time=$(date +%s)
-        batch_duration=$((batch_end_time - batch_start_time))
-        
-        # Log batch timing
-        echo "${chunk}_batch_${i},${batch_start_time},${batch_end_time},${batch_duration}" >> "${OUTDIR}/batch_timing.csv"
-        
-        echo "Completed batch ${i} of ${chunk} for sample ${sample_name} in ${batch_duration} seconds"
     done
-done
 
-# Record overall end time and calculate total duration
-overall_end_time=$(date +%s)
-total_duration=$((overall_end_time - overall_start_time))
+    # Record overall end time and calculate total duration
+    overall_end_time=$(date +%s)
+    total_duration=$((overall_end_time - sample_processing_start_time))
 
-# Add total duration to timing log
-echo "TOTAL,${overall_start_time},${overall_end_time},${total_duration}" >> "${OUTDIR}/batch_timing.csv"
-echo "Total execution time for sample ${sample_name}: ${total_duration} seconds"
-EOF
-    
-    chmod +x "$SAMPLE_JOB_SCHEDULER"
-    sync
-    sleep 1
-    # Submit the sample job scheduler and wait for completion
-    bash "$SAMPLE_JOB_SCHEDULER"
-    echo "Launched sample job scheduler for sample $sample_name as a regular shell script."
+    # Add total duration to timing log
+    echo "TOTAL,${sample_processing_start_time},${overall_end_time},${total_duration}" >> "${SAMPLE_OUTDIR}/batch_timing.csv"
+    echo "Total execution time for sample ${sample_name}: ${total_duration} seconds"
     
     # Record sample end time and duration
     sample_end_time=$(date +%s)
