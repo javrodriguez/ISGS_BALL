@@ -115,14 +115,13 @@ while IFS= read -r sample_name; do
     
     # Create sample-specific screen script
     SAMPLE_SCREEN_SCRIPT="${SAMPLE_OUTDIR}/screen_${sample_name}.sh"
-    cat > "$SAMPLE_SCREEN_SCRIPT" << EOF
-#!/bin/bash
-#SBATCH -J screen_${sample_name}
-#SBATCH --mem=10gb 
-#SBATCH --partition=gpu4_short,gpu4_medium,gpu8_short,gpu8_medium
-#SBATCH --output=logs-screen_${sample_name}/%J.out
-#SBATCH --error=logs-screen_${sample_name}/%J.err
-
+    echo "#!/bin/bash" > "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH -J screen_${sample_name}" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --mem=10gb" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --partition=gpu4_short,gpu4_medium,gpu8_short,gpu8_medium" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --output=logs-screen_${sample_name}/%J.out" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --error=logs-screen_${sample_name}/%J.err" >> "$SAMPLE_SCREEN_SCRIPT"
+    cat >> "$SAMPLE_SCREEN_SCRIPT" << EOF
 bedfile=\$1
 outdir=\$2
 model=${MODEL_PATH}
@@ -150,7 +149,13 @@ EOF
     
     # Create sample-specific job scheduler
     SAMPLE_JOB_SCHEDULER="${SAMPLE_OUTDIR}/job_scheduler_${sample_name}.sh"
-    cat > "$SAMPLE_JOB_SCHEDULER" <<'EOF'
+    echo "#!/bin/bash" > "$SAMPLE_JOB_SCHEDULER"
+    echo "#SBATCH -J jobScheduler_${sample_name}" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "#SBATCH --partition=gpu4_long,gpu8_long" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "#SBATCH --mem=2gb" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "#SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "#SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr" >> "$SAMPLE_JOB_SCHEDULER"
+    cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
 #!/bin/bash
 #SBATCH -J jobScheduler_${sample_name}
 #SBATCH --partition=gpu4_long,gpu8_long
