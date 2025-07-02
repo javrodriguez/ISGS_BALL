@@ -121,6 +121,7 @@ while IFS= read -r sample_name; do
     echo "#SBATCH --partition=gpu4_short,gpu4_medium,gpu8_short,gpu8_medium" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --output=logs-screen_${sample_name}/%J.out" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --error=logs-screen_${sample_name}/%J.err" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --time=12:00:00" >> "$SAMPLE_SCREEN_SCRIPT"
     cat >> "$SAMPLE_SCREEN_SCRIPT" << EOF
 bedfile=\$1
 outdir=\$2
@@ -153,6 +154,7 @@ EOF
     echo "#SBATCH --mem=2gb" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "#SBATCH --time=12:00:00" >> "$SAMPLE_JOB_SCHEDULER"
     echo "BEDFILE=$BEDFILE" >> "$SAMPLE_JOB_SCHEDULER"
     echo "OUTDIR=$SAMPLE_OUTDIR" >> "$SAMPLE_JOB_SCHEDULER"
     cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
@@ -177,7 +179,7 @@ for chunk in ${OUTDIR}/bed_chunk_*; do
         end=$(( (i + 1) * BATCH_SIZE ))
         [ "$end" -gt "$lines" ] && end=$lines
         
-        JOB=$(sbatch --array=${start}-${end} ${SAMPLE_SCREEN_SCRIPT} "$chunk" "${OUTDIR}" | awk '{print $4}')
+        JOB=$(sbatch --time=12:00:00 --array=${start}-${end} ${SAMPLE_SCREEN_SCRIPT} "$chunk" "${OUTDIR}" | awk '{print $4}')
         echo "Submitted batch job with ID $JOB for sample ${sample_name}, waiting to complete..."
         sleep 5
         # Wait for job to appear in squeue
@@ -218,7 +220,7 @@ EOF
     echo "Submitted sample job scheduler with ID $SAMPLE_JOB for sample $sample_name"
     
     # Wait for the sample to complete
-    while sacct -j $SAMPLE_JOB --format=State --noheader | grep -q 'RUNNING\|PENDING'; do
+    while squeue -j $SAMPLE_JOB | grep -q $SAMPLE_JOB; do
         sleep 30
     done
     
@@ -227,7 +229,7 @@ EOF
     sample_duration=$((sample_end_time - sample_start_time))
     
     # Check if sample completed successfully
-    if sacct -j $SAMPLE_JOB --format=State --noheader | grep -q 'COMPLETED'; then
+    if squeue -j $SAMPLE_JOB | grep -q $SAMPLE_JOB; then
         status="COMPLETED"
         echo "Sample $sample_name completed successfully in ${sample_duration} seconds"
     else
