@@ -156,11 +156,6 @@ EOF
     echo "BEDFILE=$BEDFILE" >> "$SAMPLE_JOB_SCHEDULER"
     echo "OUTDIR=$SAMPLE_OUTDIR" >> "$SAMPLE_JOB_SCHEDULER"
     cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
-#!/bin/bash
-#SBATCH --mem=2gb
-#SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout
-#SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr
-
 # Create output directory if it doesn't exist
 mkdir -p "${OUTDIR}"
 
