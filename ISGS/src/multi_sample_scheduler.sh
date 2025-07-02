@@ -219,13 +219,8 @@ EOF
     sync
     sleep 1
     # Submit the sample job scheduler and wait for completion
-    SAMPLE_JOB=$(sbatch "$SAMPLE_JOB_SCHEDULER" | awk '{print $4}')
-    echo "Submitted sample job scheduler with ID $SAMPLE_JOB for sample $sample_name"
-    
-    # Wait for the sample to complete
-    while squeue -j $SAMPLE_JOB | grep -q $SAMPLE_JOB; do
-        sleep 30
-    done
+    bash "$SAMPLE_JOB_SCHEDULER"
+    echo "Launched sample job scheduler for sample $sample_name as a regular shell script."
     
     # Record sample end time and duration
     sample_end_time=$(date +%s)
