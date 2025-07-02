@@ -155,6 +155,8 @@ EOF
     echo "#SBATCH --mem=2gb" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "BEDFILE=$BEDFILE" >> "$SAMPLE_JOB_SCHEDULER"
+    echo "OUTDIR=$SAMPLE_OUTDIR" >> "$SAMPLE_JOB_SCHEDULER"
     cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
 #!/bin/bash
 #SBATCH -J jobScheduler_${sample_name}
