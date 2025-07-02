@@ -7,7 +7,7 @@ echo "Single Sample Pipeline Test"
 echo "=========================="
 
 # Create a test samples file with just one sample
-echo "BALL-MCG001" > test_samples.txt
+echo "GSM6481643" > test_samples.txt
 
 # Create a minimal test BED file (just 10 lines)
 head -10 ../peakome.bed > test_bed.bed

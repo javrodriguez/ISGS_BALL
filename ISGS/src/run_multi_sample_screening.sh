@@ -6,7 +6,7 @@
 # Configuration - Update these paths according to your setup
 BEDFILE="../peakome.bed"
 SAMPLES_FILE="../samples.txt"
-INPUT_DIR="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/maxATAC_GSE226400/"
+INPUT_DIR="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/maxATAC_GSE226400"
 MODEL_PATH="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/C.Origami/ball_stringent-oe_exp_pred_ep32.ckpt"
 SEQ_PATH="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/C.Origami/data/hg38/dna_sequence"
 
