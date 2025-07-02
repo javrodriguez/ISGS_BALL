@@ -150,8 +150,6 @@ EOF
     # Create sample-specific job scheduler
     SAMPLE_JOB_SCHEDULER="${SAMPLE_OUTDIR}/job_scheduler_${sample_name}.sh"
     echo "#!/bin/bash" > "$SAMPLE_JOB_SCHEDULER"
-    echo "#SBATCH -J jobScheduler_${sample_name}" >> "$SAMPLE_JOB_SCHEDULER"
-    echo "#SBATCH --partition=gpu4_long,gpu8_long" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --mem=2gb" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout" >> "$SAMPLE_JOB_SCHEDULER"
     echo "#SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr" >> "$SAMPLE_JOB_SCHEDULER"
@@ -159,18 +157,9 @@ EOF
     echo "OUTDIR=$SAMPLE_OUTDIR" >> "$SAMPLE_JOB_SCHEDULER"
     cat >> "$SAMPLE_JOB_SCHEDULER" <<'EOF'
 #!/bin/bash
-#SBATCH -J jobScheduler_${sample_name}
-#SBATCH --partition=gpu4_long,gpu8_long
-#SBATCH --mem=2gb 
+#SBATCH --mem=2gb
 #SBATCH --output=logs-job_scheduler_${sample_name}/%J.logout
 #SBATCH --error=logs-job_scheduler_${sample_name}/%J.logerr
-
-# Record overall start time
-overall_start_time=$(date +%s)
-BEDFILE=${BEDFILE}
-OUTDIR=${SAMPLE_OUTDIR}
-BATCH_SIZE=1000
-MAX_INDEX=2500
 
 # Create output directory if it doesn't exist
 mkdir -p "${OUTDIR}"
