@@ -4,7 +4,7 @@ This repository contains a comprehensive pipeline for in-silico genetic screenin
 
 ## 🎯 Project Overview
 
-This project performs genetic screening on **87 B-ALL samples** using:
+This project performs genetic screening on **155 B-ALL samples** using:
 - **ATAC-seq peaks** from each individual sample
 - **CTCF binding data** (log2 fold change)
 - **CoRIGAMI foundation model** for chromatin structure prediction
@@ -31,14 +31,15 @@ This project performs genetic screening on **87 B-ALL samples** using:
 **⚠️ Important**: Due to GitHub's file size limits, the BED files are not included in this repository. You need to obtain them separately.
 
 ### Required BED Files (Not in Repository)
-- **Individual Sample Peaks**: 87 GSM files in `peaks/` directory
+- **Individual Sample Peaks**: 155 GSM files in `peaks/` directory
   - Each file contains ATAC-seq peaks for one sample
   - Format: BED4 (chr, start, end, peak_id)
-  - Example: `peaks/GSM6481643.peaks.bed`
+  - Typical range: 100,000-150,000 peaks per sample
+  - Example: `peaks/GSM6481643.peaks.bed` (113,449 peaks)
 
 - **Unified Peakome**: `unified_peakome_1kb_no_overlaps.bed`
-  - Created from all 87 samples
-  - Overlap removal for unique regions
+  - Created from all 155 samples
+  - Contains 191,876 unique peaks after overlap removal
   - Used for screening across all samples
 
 ### How to Obtain BED Files
@@ -65,7 +66,7 @@ The CoRIGAMI foundation model has been trained on B-ALL chromatin structure data
 - Regulatory element perturbations
 
 ### Multi-Sample Approach
-- **87 B-ALL samples** with individual ATAC-seq data
+- **155 B-ALL samples** with individual ATAC-seq data
 - **Sample-specific genomic features** (CTCF, ATAC bigwigs)
 - **Shared model parameters** for consistency
 - **Unified peakome** for comprehensive coverage
@@ -188,9 +189,9 @@ SEQ_PATH="/path/to/dna/sequence"
 ## 📊 Performance Considerations
 
 ### Timing Estimates
-- **Per sample**: 2-4 hours (depending on HPC load)
-- **Total time**: 1-2 weeks for 87 samples
-- **Storage**: ~100-200GB total output
+- **Per sample**: 4-8 hours (depending on HPC load and ~100-150k peaks per sample)
+- **Total time**: 3-4 weeks for 155 samples
+- **Storage**: ~200-400GB total output
 
 ### Resource Requirements
 - **Multi-sample scheduler**: 2GB, gpu4_long/gpu8_long
