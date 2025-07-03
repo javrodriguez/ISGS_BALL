@@ -198,7 +198,11 @@ EOF
             echo "${chunk}_batch_${i},${batch_start_time},${batch_end_time},${batch_duration}" >> "${SAMPLE_OUTDIR}/batch_timing.csv"
             
             echo "Completed batch ${i} of ${chunk} for sample ${sample_name} in ${batch_duration} seconds"
+            sleep 30  # Add delay between batches to reduce SLURM scheduler load
         done
+        
+        echo "Completed all batches for chunk ${chunk} for sample ${sample_name}"
+        sleep 60  # Add delay between chunks to reduce SLURM scheduler load
     done
 
     # Record overall end time and calculate total duration
@@ -225,6 +229,8 @@ EOF
     # Log sample timing
     echo "${sample_name},${sample_start_time},${sample_end_time},${sample_duration},${status}" >> "${MAIN_OUTDIR}/sample_timing.csv"
     
+    echo "Completed processing sample ${sample_name}. Waiting before next sample..."
+    sleep 120  # Add delay between samples to reduce SLURM scheduler load
 done < "$SAMPLES_FILE"
 
 # Record overall end time and calculate total duration
