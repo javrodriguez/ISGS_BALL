@@ -184,9 +184,22 @@ EOF
                 echo "Waiting for squeue to recognize job $JOB..."
                 sleep 2
             done
-            # Wait for job to finish (disappear from squeue)
+            # Wait for job to finish (disappear from squeue), but timeout if no running jobs after 20 min (timeout starts after first task runs)
+            wait_time=0
+            timeout=1200  # 20 minutes
+            has_run=0
             while squeue -j $JOB | grep -q $JOB; do
-                echo "Waiting for job $JOB to finish..."
+                running_jobs=$(squeue -u $USER -h -o "%i %T" | awk -v jid="$JOB" '$1 ~ ("^"jid"_") && ($2 == "R" || $2 == "RUNNING")' | wc -l)
+                if [ $running_jobs -gt 0 ]; then
+                    has_run=1
+                fi
+                if [ $has_run -eq 1 ]; then
+                    if [ $running_jobs -eq 0 ] && [ $wait_time -ge $timeout ]; then
+                        echo "WARNING: Batch job $JOB has no running jobs after $timeout seconds. Moving to next batch."
+                        break
+                    fi
+                    wait_time=$((wait_time + 10))
+                fi
                 sleep 10
             done
             
