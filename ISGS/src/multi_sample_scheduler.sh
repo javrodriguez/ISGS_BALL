@@ -118,8 +118,8 @@ while IFS= read -r sample_name; do
     echo "#SBATCH -J screen_${sample_name}" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --mem=10gb" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --partition=gpu4_short,gpu4_medium,gpu8_short,gpu8_medium" >> "$SAMPLE_SCREEN_SCRIPT"
-    echo "#SBATCH --output=logs-screen_${sample_name}/%J.out" >> "$SAMPLE_SCREEN_SCRIPT"
-    echo "#SBATCH --error=logs-screen_${sample_name}/%J.err" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --output=logs-screen_${sample_name}/%A.out" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --error=logs-screen_${sample_name}/%A.err" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --time=12:00:00" >> "$SAMPLE_SCREEN_SCRIPT"
     cat >> "$SAMPLE_SCREEN_SCRIPT" << EOF
 bedfile=\$1
