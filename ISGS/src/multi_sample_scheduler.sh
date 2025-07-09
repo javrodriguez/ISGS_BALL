@@ -218,6 +218,10 @@ EOF
         sleep 60  # Add delay between chunks to reduce SLURM scheduler load
     done
 
+    # Compile all bedgraph files for this sample into one file and clean up
+    COMPILED_BEDGRAPH="${SAMPLE_OUTDIR}/compiled_impact_scores.bedgraph"
+    sbatch ISGS/src/compile_bedgraph.sh "${SAMPLE_OUTDIR}" "$COMPILED_BEDGRAPH"
+
     # Record overall end time and calculate total duration
     overall_end_time=$(date +%s)
     total_duration=$((overall_end_time - sample_processing_start_time))
