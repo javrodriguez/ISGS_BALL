@@ -236,13 +236,52 @@ def main():
                        help='Maximum number of peaks to keep per sample (default: 50000)')
     parser.add_argument('--remove-overlaps', action='store_true',
                        help='Remove overlapping peaks after processing')
+    parser.add_argument('--samples-file', 
+                       help='File containing list of sample names to include (one per line)')
+    parser.add_argument('--top-n-peaks', type=int,
+                       help='Keep only the top N peaks by score across all samples')
     
     args = parser.parse_args()
+    
+    # Load sample filter if provided
+    sample_filter = set()
+    if args.samples_file:
+        if not os.path.exists(args.samples_file):
+            logger.error(f"Samples file not found: {args.samples_file}")
+            return 1
+        
+        with open(args.samples_file, 'r') as f:
+            for line in f:
+                sample_name = line.strip()
+                if sample_name and not sample_name.startswith('#'):
+                    sample_filter.add(sample_name)
+        
+        logger.info(f"Loaded {len(sample_filter)} sample names for filtering")
     
     # Find all peak files
     peak_files = glob.glob(args.input_pattern)
     if not peak_files:
         logger.error(f"No files found matching pattern: {args.input_pattern}")
+        return 1
+    
+    # Filter peak files based on sample names if filter is provided
+    if sample_filter:
+        filtered_peak_files = []
+        for peak_file in peak_files:
+            # Extract sample name from filename (assuming format: SAMPLE.peaks.bed)
+            filename = os.path.basename(peak_file)
+            sample_name = filename.replace('.peaks.bed', '')
+            
+            if sample_name in sample_filter:
+                filtered_peak_files.append(peak_file)
+            else:
+                logger.info(f"Skipping {peak_file} (sample {sample_name} not in filter)")
+        
+        peak_files = filtered_peak_files
+        logger.info(f"After filtering: {len(peak_files)} peak files")
+    
+    if not peak_files:
+        logger.error("No peak files remain after filtering")
         return 1
     
     logger.info(f"Found {len(peak_files)} peak files")
@@ -285,7 +324,15 @@ def main():
         processed_peaks = remove_overlapping_peaks(processed_peaks)
         logger.info(f"After removing overlaps: {len(processed_peaks)} peaks")
     
-    # Sort final peaks
+    # Step 4: Keep only top N peaks by score if requested
+    if args.top_n_peaks:
+        logger.info(f"Keeping only top {args.top_n_peaks:,} peaks by score")
+        # Sort by score (descending) and keep top N
+        processed_peaks.sort(key=lambda p: p.score, reverse=True)
+        processed_peaks = processed_peaks[:args.top_n_peaks]
+        logger.info(f"After top-N filtering: {len(processed_peaks)} peaks")
+    
+    # Sort final peaks by chromosome and position
     processed_peaks.sort(key=lambda p: (p.chrom, p.start))
     
     # Write output
