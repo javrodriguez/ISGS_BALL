@@ -110,7 +110,7 @@ while IFS= read -r sample_name; do
     mkdir -p "$SAMPLE_OUTDIR"
     
     # Create log directories with sample_name expanded at generation time
-    mkdir -p "logs-screen_${sample_name}"
+    mkdir -p "${SAMPLE_OUTDIR}/logs-screen_${sample_name}"
     
     # Create sample-specific screen script
     SAMPLE_SCREEN_SCRIPT="${SAMPLE_OUTDIR}/screen_${sample_name}.sh"
@@ -118,8 +118,8 @@ while IFS= read -r sample_name; do
     echo "#SBATCH -J screen_${sample_name}" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --mem=10gb" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --partition=gpu4_short,gpu4_medium,gpu8_short,gpu8_medium" >> "$SAMPLE_SCREEN_SCRIPT"
-    echo "#SBATCH --output=logs-screen_${sample_name}/%A.out" >> "$SAMPLE_SCREEN_SCRIPT"
-    echo "#SBATCH --error=logs-screen_${sample_name}/%A.err" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --output=${SAMPLE_OUTDIR}/logs-screen_${sample_name}/%A.out" >> "$SAMPLE_SCREEN_SCRIPT"
+    echo "#SBATCH --error=${SAMPLE_OUTDIR}/logs-screen_${sample_name}/%A.err" >> "$SAMPLE_SCREEN_SCRIPT"
     echo "#SBATCH --time=12:00:00" >> "$SAMPLE_SCREEN_SCRIPT"
     cat >> "$SAMPLE_SCREEN_SCRIPT" << EOF
 bedfile=\$1
