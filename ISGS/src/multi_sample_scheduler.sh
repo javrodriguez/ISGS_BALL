@@ -218,9 +218,43 @@ EOF
         sleep 60  # Add delay between chunks to reduce SLURM scheduler load
     done
 
-    # Compile all bedgraph files for this sample into one file and clean up
+    # Compile all bedgraph files for this sample into one file and clean up (local execution)
     COMPILED_BEDGRAPH="${SAMPLE_OUTDIR}/compiled_impact_scores.bedgraph"
-    sbatch ISGS/src/compile_bedgraph.sh "${SAMPLE_OUTDIR}" "$COMPILED_BEDGRAPH"
+    echo "Compiling bedgraph files for sample $sample_name..."
+    
+    # Find and compile bedgraph files
+    if find "${SAMPLE_OUTDIR}" -type f -name "*impact_score.bedgraph" > /tmp/found_files_${sample_name}.txt; then
+        if [ -s /tmp/found_files_${sample_name}.txt ]; then
+            echo "Found $(wc -l < /tmp/found_files_${sample_name}.txt) bedgraph files for sample $sample_name"
+            
+            # Compile the files
+            > "$COMPILED_BEDGRAPH"
+            processed_count=0
+            while IFS= read -r file; do
+                if [ -r "$file" ]; then
+                    peak_id=$(echo "$file" | grep -o "PEAK_[0-9]\+")
+                    if [ -n "$peak_id" ]; then
+                        awk -v peak="$peak_id" '{print $0, peak}' "$file" >> "$COMPILED_BEDGRAPH"
+                        processed_count=$((processed_count + 1))
+                    fi
+                fi
+            done < /tmp/found_files_${sample_name}.txt
+            
+            echo "Successfully compiled $processed_count bedgraph files for sample $sample_name"
+            
+            # Remove PEAK_* directories
+            peaks_removed=$(find "${SAMPLE_OUTDIR}" -type d -name "PEAK_*" | wc -l)
+            find "${SAMPLE_OUTDIR}" -type d -name "PEAK_*" -exec rm -rf {} + 2>/dev/null
+            echo "Removed $peaks_removed PEAK_* directories for sample $sample_name"
+            
+            # Clean up temp file
+            rm -f /tmp/found_files_${sample_name}.txt
+        else
+            echo "WARNING: No bedgraph files found for sample $sample_name"
+        fi
+    else
+        echo "WARNING: Could not search for bedgraph files in sample $sample_name"
+    fi
 
     # Record overall end time and calculate total duration
     overall_end_time=$(date +%s)
