@@ -28,3 +28,6 @@ __pycache__/
 
 *.bed
 data_files/
+
+# Pipeline results directories
+results_*/
