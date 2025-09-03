@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to compile all bedgraph files into a single table.
-Input: Multiple bedgraph files with format: GSM6481795_impact_scores.bedgraph
+Input: Multiple bedgraph files with format: sample_name/compiled_impact_scores.bedgraph
 Output: Single table with peak_id as first column, one column per sample with scores.
 """
 
@@ -13,7 +13,7 @@ from collections import defaultdict
 
 def extract_sample_name(filepath):
     """Extract sample name from filepath like '/path/to/GSM6481643/compiled_impact_scores.bedgraph'"""
-    # Extract the GSM directory name from the path
+    # Extract the sample directory name from the path
     sample_name = os.path.basename(os.path.dirname(filepath))
     return sample_name
 
@@ -44,7 +44,7 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Compile all bedgraph files into a single table')
     parser.add_argument('--input-dir', '-i', required=True,
-                       help='Input directory containing GSM* subdirectories with bedgraph files')
+                       help='Input directory containing sample subdirectories with bedgraph files')
     parser.add_argument('--output-file', '-o', default='compiled_impact_scores.tsv',
                        help='Output file name (default: compiled_impact_scores.tsv)')
     
@@ -55,11 +55,11 @@ def main():
         print(f"Error: Input directory '{args.input_dir}' does not exist!")
         return
     
-    # Find all bedgraph files in GSM* subdirectories
+    # Find all bedgraph files in any sample subdirectories
     bedgraph_files = []
     for item in os.listdir(args.input_dir):
         item_path = os.path.join(args.input_dir, item)
-        if os.path.isdir(item_path) and item.startswith('GSM'):
+        if os.path.isdir(item_path):
             bedgraph_file = os.path.join(item_path, 'compiled_impact_scores.bedgraph')
             if os.path.exists(bedgraph_file):
                 bedgraph_files.append(bedgraph_file)

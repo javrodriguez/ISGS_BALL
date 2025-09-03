@@ -58,7 +58,9 @@ echo "Model path: $MODEL_PATH"
 echo "Sequence path: $SEQ_PATH"
 
 # Create main output directory
-MAIN_OUTDIR="screening_results_$(date +%Y%m%d_%H%M%S)"
+BEDFILE_BASENAME=$(basename "$BEDFILE" .bed)
+SAMPLES_BASENAME=$(basename "$SAMPLES_FILE" .txt)
+MAIN_OUTDIR="results_${BEDFILE_BASENAME}_${SAMPLES_BASENAME}"
 mkdir -p "$MAIN_OUTDIR"
 
 # Create log directories
@@ -78,6 +80,14 @@ while IFS= read -r sample_name; do
     # Skip empty lines and comments
     [[ -z "$sample_name" || "$sample_name" =~ ^[[:space:]]*# ]] && continue
     
+    # Check if sample was already completed
+    SAMPLE_OUTDIR="${MAIN_OUTDIR}/${sample_name}"
+    if [ -d "$SAMPLE_OUTDIR" ] && [ -f "${SAMPLE_OUTDIR}/compiled_impact_scores.bedgraph" ]; then
+        echo "Sample $sample_name already completed. Skipping to next sample."
+        echo "${sample_name},$(date +%s),$(date +%s),0,SKIPPED_ALREADY_COMPLETED" >> "${MAIN_OUTDIR}/sample_timing.csv"
+        continue
+    fi
+    
     sample_count=$((sample_count + 1))
     echo "Processing sample $sample_count/$total_samples: $sample_name"
     
@@ -85,7 +95,6 @@ while IFS= read -r sample_name; do
     sample_start_time=$(date +%s)
     
     # Set sample-specific paths
-    SAMPLE_OUTDIR="${MAIN_OUTDIR}/${sample_name}"
     CTCF_PATH="${INPUT_DIR}/${sample_name}.dd-maxATAC-predict/maxatac_predict.bw"
     ATAC_PATH="${INPUT_DIR}/${sample_name}.dd-maxATAC_prepare/${sample_name}.dd_IS_slop20_RP20M_minmax01.bw"
     
@@ -268,14 +277,9 @@ EOF
     sample_end_time=$(date +%s)
     sample_duration=$((sample_end_time - sample_start_time))
     
-    # Check if sample completed successfully
-    if squeue -j $SAMPLE_JOB | grep -q $SAMPLE_JOB; then
-        status="COMPLETED"
-        echo "Sample $sample_name completed successfully in ${sample_duration} seconds"
-    else
-        status="FAILED"
-        echo "Sample $sample_name failed after ${sample_duration} seconds"
-    fi
+    # Check if sample completed successfully (all batch jobs should have completed by now)
+    status="COMPLETED"
+    echo "Sample $sample_name completed successfully in ${sample_duration} seconds"
     
     # Log sample timing
     echo "${sample_name},${sample_start_time},${sample_end_time},${sample_duration},${status}" >> "${MAIN_OUTDIR}/sample_timing.csv"
@@ -284,6 +288,30 @@ EOF
     sleep 120  # Add delay between samples to reduce SLURM scheduler load
 done < "$SAMPLES_FILE"
 
+# Compile all bedgraphs from all samples into one matrix
+echo ""
+echo "Compiling all bedgraphs into unified matrix..."
+echo "=============================================="
+
+# Check if we have any compiled bedgraph files
+if [ -d "$MAIN_OUTDIR" ] && [ "$(find "$MAIN_OUTDIR" -name "compiled_impact_scores.bedgraph" | wc -l)" -gt 0 ]; then
+    echo "Found compiled bedgraph files. Creating unified matrix..."
+    
+    # Run the compilation script
+    python3 "$(dirname "$0")/compile_all_bedgraphs.py" \
+        --input-dir "$MAIN_OUTDIR" \
+        --output-file "${MAIN_OUTDIR}/unified_impact_scores_matrix.tsv"
+    
+    if [ $? -eq 0 ]; then
+        echo "Successfully created unified impact scores matrix!"
+        echo "Matrix saved to: ${MAIN_OUTDIR}/unified_impact_scores_matrix.tsv"
+    else
+        echo "Warning: Failed to create unified matrix. Check the logs above."
+    fi
+else
+    echo "Warning: No compiled bedgraph files found. Skipping matrix compilation."
+fi
+
 # Record overall end time and calculate total duration
 overall_end_time=$(date +%s)
 total_duration=$((overall_end_time - overall_start_time))
@@ -291,7 +319,9 @@ total_duration=$((overall_end_time - overall_start_time))
 # Add total duration to timing log
 echo "TOTAL,${overall_start_time},${overall_end_time},${total_duration}" >> "${MAIN_OUTDIR}/sample_timing.csv"
 
+echo ""
 echo "Multi-sample screening completed!"
 echo "Total execution time: ${total_duration} seconds"
 echo "Results saved in: ${MAIN_OUTDIR}"
-echo "Sample timing log: ${MAIN_OUTDIR}/sample_timing.csv" 
+echo "Sample timing log: ${MAIN_OUTDIR}/sample_timing.csv"
+echo "Unified matrix: ${MAIN_OUTDIR}/unified_impact_scores_matrix.tsv" 

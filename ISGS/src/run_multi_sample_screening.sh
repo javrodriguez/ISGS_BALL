@@ -4,8 +4,8 @@
 # This script sets up the parameters and runs the multi-sample scheduler
 
 # Configuration - Update these paths according to your setup
-BEDFILE="peakome_test_4k.bed"
-SAMPLES_FILE="samples_test.txt"
+BEDFILE="$(dirname "$0")/../peakome_test_4k.bed"
+SAMPLES_FILE="$(dirname "$0")/../samples_test.txt"
 INPUT_DIR="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/maxATAC_GSE226400"
 MODEL_PATH="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/C.Origami/ball_stringent-oe_exp_pred_ep32.ckpt"
 SEQ_PATH="/gpfs/data/abl/home/rodrij92/PROJECTS/BALL_Corigami/C.Origami/data/hg38/dna_sequence"
@@ -74,12 +74,12 @@ echo "Each sample will be processed with the same BED file but different genomic
 echo ""
 
 # Submit the job
-sbatch multi_sample_scheduler.sh "$BEDFILE" "$SAMPLES_FILE" "$INPUT_DIR" "$MODEL_PATH" "$SEQ_PATH"
+sbatch "$(dirname "$0")/multi_sample_scheduler.sh" "$BEDFILE" "$SAMPLES_FILE" "$INPUT_DIR" "$MODEL_PATH" "$SEQ_PATH"
 
 echo ""
 echo "Job submitted successfully!"
 echo "You can monitor progress using:"
 echo "  squeue -u $USER"
 echo ""
-echo "Results will be saved in: screening_results_YYYYMMDD_HHMMSS/"
-echo "Sample timing information will be in: screening_results_YYYYMMDD_HHMMSS/sample_timing.csv" 
+echo "Results will be saved in: results_<bedfile_name>_<samples_name>/"
+echo "Sample timing information will be in: results_<bedfile_name>_<samples_name>/sample_timing.csv" 
