@@ -75,21 +75,24 @@ echo "Total samples to process: $total_samples"
 
 # Process each sample
 sample_count=0
+overall_sample_count=0
 
 while IFS= read -r sample_name; do
     # Skip empty lines and comments
     [[ -z "$sample_name" || "$sample_name" =~ ^[[:space:]]*# ]] && continue
     
+    overall_sample_count=$((overall_sample_count + 1))
+    
     # Check if sample was already completed
     SAMPLE_OUTDIR="${MAIN_OUTDIR}/${sample_name}"
     if [ -d "$SAMPLE_OUTDIR" ] && [ -f "${SAMPLE_OUTDIR}/compiled_impact_scores.bedgraph" ]; then
-        echo "Sample $sample_name already completed. Skipping to next sample."
+        echo "Sample $overall_sample_count/$total_samples: $sample_name already completed. Skipping to next sample."
         echo "${sample_name},$(date +%s),$(date +%s),0,SKIPPED_ALREADY_COMPLETED" >> "${MAIN_OUTDIR}/sample_timing.csv"
         continue
     fi
     
     sample_count=$((sample_count + 1))
-    echo "Processing sample $sample_count/$total_samples: $sample_name"
+    echo "Processing sample $overall_sample_count/$total_samples: $sample_name"
     
     # Record sample start time
     sample_start_time=$(date +%s)
