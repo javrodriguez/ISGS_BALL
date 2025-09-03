@@ -11,13 +11,11 @@ import re
 import argparse
 from collections import defaultdict
 
-def extract_sample_name(filename):
-    """Extract sample name from filename like 'GSM6481795_impact_scores.bedgraph'"""
-    match = re.match(r'(GSM\d+)_impact_scores\.bedgraph', filename)
-    if match:
-        return match.group(1)
-    else:
-        raise ValueError(f"Could not extract sample name from filename: {filename}")
+def extract_sample_name(filepath):
+    """Extract sample name from filepath like '/path/to/GSM6481643/compiled_impact_scores.bedgraph'"""
+    # Extract the GSM directory name from the path
+    sample_name = os.path.basename(os.path.dirname(filepath))
+    return sample_name
 
 def read_bedgraph_file(filepath):
     """Read bedgraph file and return dict of peak_id -> score"""
@@ -45,8 +43,8 @@ def read_bedgraph_file(filepath):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Compile all bedgraph files into a single table')
-    parser.add_argument('--input-dir', '-i', default='.', 
-                       help='Input directory containing bedgraph files (default: current directory)')
+    parser.add_argument('--input-dir', '-i', required=True,
+                       help='Input directory containing GSM* subdirectories with bedgraph files')
     parser.add_argument('--output-file', '-o', default='compiled_impact_scores.tsv',
                        help='Output file name (default: compiled_impact_scores.tsv)')
     
@@ -57,11 +55,14 @@ def main():
         print(f"Error: Input directory '{args.input_dir}' does not exist!")
         return
     
-    # Find all bedgraph files in input directory
+    # Find all bedgraph files in GSM* subdirectories
     bedgraph_files = []
-    for filename in os.listdir(args.input_dir):
-        if filename.endswith('_impact_scores.bedgraph'):
-            bedgraph_files.append(os.path.join(args.input_dir, filename))
+    for item in os.listdir(args.input_dir):
+        item_path = os.path.join(args.input_dir, item)
+        if os.path.isdir(item_path) and item.startswith('GSM'):
+            bedgraph_file = os.path.join(item_path, 'compiled_impact_scores.bedgraph')
+            if os.path.exists(bedgraph_file):
+                bedgraph_files.append(bedgraph_file)
     
     if not bedgraph_files:
         print(f"No bedgraph files found in directory: {args.input_dir}")
@@ -75,9 +76,8 @@ def main():
     
     for filepath in bedgraph_files:
         try:
-            filename = os.path.basename(filepath)
-            sample_name = extract_sample_name(filename)
-            print(f"Processing {filename} -> {sample_name}")
+            sample_name = extract_sample_name(filepath)
+            print(f"Processing {sample_name} from {filepath}")
             
             peak_scores = read_bedgraph_file(filepath)
             sample_data[sample_name] = peak_scores
