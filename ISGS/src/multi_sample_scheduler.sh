@@ -285,7 +285,7 @@ EOF
     echo "${sample_name},${sample_start_time},${sample_end_time},${sample_duration},${status}" >> "${MAIN_OUTDIR}/sample_timing.csv"
     
     echo "Completed processing sample ${sample_name}. Waiting before next sample..."
-    sleep 120  # Add delay between samples to reduce SLURM scheduler load
+    sleep 20  # Add delay between samples to reduce SLURM scheduler load
 done < "$SAMPLES_FILE"
 
 # Compile all bedgraphs from all samples into one matrix
