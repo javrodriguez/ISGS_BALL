@@ -300,6 +300,11 @@ if [ -d "$MAIN_OUTDIR" ] && [ "$(find "$MAIN_OUTDIR" -name "compiled_impact_scor
     # Run the compilation script
     # Get the absolute path to the script directory from the original working directory
     ORIGINAL_DIR="/gpfs/home/rodrij92/abl_home/development/ISGS_BALL/ISGS/src"
+    
+    # Activate conda environment for pandas
+    source /gpfs/home/rodrij92/home_abl/miniconda3/etc/profile.d/conda.sh
+    conda activate corigami_ball
+    
     python3 "${ORIGINAL_DIR}/compile_all_bedgraphs.py" \
         --input-dir "$MAIN_OUTDIR" \
         --output-file "${MAIN_OUTDIR}/unified_impact_scores_matrix.tsv"
