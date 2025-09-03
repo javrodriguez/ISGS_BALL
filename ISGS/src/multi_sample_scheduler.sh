@@ -298,7 +298,9 @@ if [ -d "$MAIN_OUTDIR" ] && [ "$(find "$MAIN_OUTDIR" -name "compiled_impact_scor
     echo "Found compiled bedgraph files. Creating unified matrix..."
     
     # Run the compilation script
-    python3 "$(dirname "$0")/compile_all_bedgraphs.py" \
+    # Get the absolute path to the script directory from the original working directory
+    ORIGINAL_DIR="/gpfs/home/rodrij92/abl_home/development/ISGS_BALL/ISGS/src"
+    python3 "${ORIGINAL_DIR}/compile_all_bedgraphs.py" \
         --input-dir "$MAIN_OUTDIR" \
         --output-file "${MAIN_OUTDIR}/unified_impact_scores_matrix.tsv"
     
