@@ -43,8 +43,11 @@ This project performs genetic screening on **155 B-ALL samples** using:
   - Used for screening across all samples
 
 ### How to Obtain BED Files
-1. **Contact the authors** for access to the BED files
-2. **Use the Python scripts** in this repository to generate them:
+The peak files derive from patient B-ALL ATAC-seq samples (GEO `GSM*` accessions) and are too large for GitHub; they are not redistributed here.
+You can still exercise the full pipeline:
+1. **Regenerate them from your own ATAC-seq peak calls** with the Python scripts in this repository (below), or **contact the authors** for access to the originals.
+2. **Validate the pipeline without the full dataset** using the included test scripts (`test_pipeline.sh`, `test_single_sample.sh`).
+3. **Use the Python scripts** in this repository to generate them:
    ```bash
    # Generate individual peak files from your ATAC-seq data
    python create_unified_peakome.py
@@ -238,11 +241,11 @@ echo "BALL-MCG001" > test_samples.txt
 
 ## 📄 License
 
-[Add your license information here]
+MIT — see [LICENSE](LICENSE).
 
 ## 👥 Authors
 
-[Add author information here]
+**Javier Rodriguez Hernaez** — NYU Langone Health ([github.com/javrodriguez](https://github.com/javrodriguez))
 
 ## 🙏 Acknowledgments
 
