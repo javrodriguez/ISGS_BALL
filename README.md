@@ -239,6 +239,11 @@ echo "BALL-MCG001" > test_samples.txt
 4. Test thoroughly
 5. Submit a pull request
 
+## 📖 References
+
+- **C.Origami** — the model this screen builds on: Tan J, Shenker-Tauris N, Rodriguez-Hernaez J, et al. "Cell-type-specific prediction of 3D chromatin organization enables high-throughput in silico genetic screening." *Nature Biotechnology* (2023). PMID [36624151](https://pubmed.ncbi.nlm.nih.gov/36624151/).
+- **Upstream code:** [tanjimin/C.Origami](https://github.com/tanjimin/C.Origami) · generalized fork used here: [javrodriguez/C.Origami_vGeneric](https://github.com/javrodriguez/C.Origami_vGeneric).
+
 ## 📄 License
 
 MIT — see [LICENSE](LICENSE).
