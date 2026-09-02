@@ -1,13 +1,13 @@
-# B-ALL Foundation Model: Multi-Sample ATAC-seq Genetic Screening Pipeline
+# In-silico genetic screening of ATAC-seq peaks across B-ALL patient samples
 
-This repository contains a comprehensive pipeline for in-silico genetic screening of ATAC-seq peaks across multiple B-ALL (B-cell Acute Lymphoblastic Leukemia) samples using the CoRIGAMI foundation model.
+This repository contains a pipeline for in-silico genetic screening of ATAC-seq peaks across multiple B-ALL (B-cell Acute Lymphoblastic Leukemia) samples using the C.Origami deep-learning model.
 
 ## 🎯 Project Overview
 
 This project performs genetic screening on **155 B-ALL samples** using:
 - **ATAC-seq peaks** from each individual sample
 - **CTCF binding data** (log2 fold change)
-- **CoRIGAMI foundation model** for chromatin structure prediction
+- **C.Origami** for cell-type-specific chromatin structure prediction
 - **Unified peakome** created from all samples with overlap removal
 
 ## 📁 Repository Structure
@@ -19,10 +19,11 @@ This project performs genetic screening on **155 B-ALL samples** using:
 │   │   ├── run_multi_sample_screening.sh # Convenient wrapper
 │   │   ├── test_pipeline.sh             # Validation script
 │   │   └── test_single_sample.sh        # Single sample test
+│   ├── samples_n85.txt            # Example sample manifest (85 entries)
+│   ├── samples_test.txt           # Single-sample manifest for the test scripts
 │   └── README.md                  # Pipeline documentation
 ├── peaks/                         # Individual sample peak files (see Data Files section)
 ├── *.py                          # Python analysis scripts
-├── samples.txt                   # Sample list for pipeline
 └── README.md                     # This file
 ```
 
@@ -56,17 +57,14 @@ You can still exercise the full pipeline:
    ```
 
 ### Sample List
-- `samples.txt` contains sample names
-- One sample per line
-- Comments start with `#`
+`samples.txt` is an input you create, not a file shipped here — one sample name per line, comments starting with `#`. Two manifests are included to copy or point at directly: `ISGS/samples_n85.txt` (85 entries) and `ISGS/samples_test.txt` (single sample, used by the test scripts). Set `SAMPLES_FILE` to whichever you use.
 
 ## 🔬 Scientific Background
 
-### B-ALL Foundation Model
-The CoRIGAMI foundation model has been trained on B-ALL chromatin structure data and can predict:
-- Chromatin accessibility changes
-- Transcription factor binding effects
-- Regulatory element perturbations
+### The model
+[C.Origami](https://github.com/tanjimin/C.Origami) ([Tan et al., *Nature Biotechnology* 2023](https://pubmed.ncbi.nlm.nih.gov/36624151/)) performs de novo prediction of **cell-type-specific chromatin organization** from DNA sequence plus two cell-type-specific genomic features — CTCF binding and chromatin accessibility. Those are its inputs; the predicted contact map is its output.
+
+Cell-type specificity here comes from the features, not from a per-sample model: every sample is screened with its own CTCF and ATAC signal against the same model and sequence parameters. In-silico perturbation of a peak is then a comparison of predicted contact maps with and without that peak's signal.
 
 ### Multi-Sample Approach
 - **155 B-ALL samples** with individual ATAC-seq data
@@ -78,7 +76,7 @@ The CoRIGAMI foundation model has been trained on B-ALL chromatin structure data
 
 ### 1. Prerequisites
 - SLURM cluster access
-- CoRIGAMI environment (`conda activate corigami_ball`)
+- C.Origami environment (`conda activate corigami_ball`)
 - Access to genomic data files
 - **BED files** (see Data Files section above)
 
@@ -156,7 +154,7 @@ screening_results_YYYYMMDD_HHMMSS/
 │   ├── screen_BALL-MCG001.sh           # Sample-specific script
 │   ├── job_scheduler_BALL-MCG001.sh    # Sample-specific scheduler
 │   ├── batch_timing.csv                # Sample timing
-│   └── [CoRIGAMI output files]
+│   └── [C.Origami output files]
 ├── BALL-MCG002/
 │   └── ...
 └── logs-*/                              # Log directories
@@ -254,7 +252,7 @@ MIT — see [LICENSE](LICENSE).
 
 ## 🙏 Acknowledgments
 
-- CoRIGAMI development team
+- The C.Origami authors — Jimin Tan, Nina Shenker-Tauris and colleagues ([Tan et al., *Nature Biotechnology* 2023](https://pubmed.ncbi.nlm.nih.gov/36624151/))
 - B-ALL research community
 - HPC cluster support team
 

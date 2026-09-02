@@ -1,6 +1,6 @@
 # Multi-Sample Genetic Screening Pipeline
 
-This pipeline performs in-silico genetic screening of ATAC-seq peaks across multiple samples using the CoRIGAMI tool.
+This pipeline performs in-silico genetic screening of ATAC-seq peaks across multiple samples using the C.Origami tool.
 
 ## Overview
 
@@ -75,7 +75,7 @@ Update paths in `run_multi_sample_screening.sh`:
 - `BEDFILE`: Path to the unified peakome BED file
 - `SAMPLES_FILE`: Path to the samples list file
 - `INPUT_DIR`: Base directory containing sample data
-- `MODEL_PATH`: Path to the CoRIGAMI model file
+- `MODEL_PATH`: Path to the C.Origami model file
 - `SEQ_PATH`: Path to the DNA sequence directory
 
 ## Output Structure
@@ -88,7 +88,7 @@ screening_results_YYYYMMDD_HHMMSS/
 │   ├── screen_<sample_name>.sh          # Sample-specific screen script
 │   ├── job_scheduler_<sample_name>.sh   # Sample-specific job scheduler
 │   ├── bed_chunk_*                      # BED file chunks
-│   └── [CoRIGAMI output files]
+│   └── [C.Origami output files]
 └── logs-*/                              # Various log directories
 ```
 
